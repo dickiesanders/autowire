@@ -150,7 +150,7 @@ func initialize(ConsulClient *api.Client, physicalIpAddr string, privKey string,
       myWgConfigMap["port"] == strconv.Itoa(config.WGPort) &&
       myWgConfigMap["pubkey"] == pubKey &&
       myWgConfigMap["allowedips"] == myWgConfigMap["ip"] + "/32" + config.WGAllowedIPs &&
-      myWgConfigMap["postup"] == config.WGPostUp) &&
+      myWgConfigMap["postup"] == config.WGPostUp &&
       myWgConfigMap["postdown"] == config.WGPostDown) {
 
       fmt.Println("My registred configurations are consistent")
