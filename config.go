@@ -15,6 +15,7 @@ type Config struct {
   WGPort int
   WGAllowedIPs string
   WGPostUp string
+  WGPostDown string
   InterfaceName string
 }
 
@@ -28,6 +29,7 @@ func init() {
   flag.IntVar(&config.WGPort, "wg-port", 51820, "Wireguard Port")
   flag.StringVar(&config.WGAllowedIPs, "allowed-ips", "", "Wireguard Allowed IPs (comma separated cidr)")
   flag.StringVar(&config.WGPostUp, "post-up", "", "steps to be run after the wireguard interface is up")
+  flag.StringVar(&config.WGPostDown, "post-down", "", "steps to be run restarting or stopping the wireguard interface")
   flag.StringVar(&config.InterfaceName, "if-name", "", "The network ip address of this interface will be used for wireguard endpoint")
 }
 

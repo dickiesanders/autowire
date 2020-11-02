@@ -18,6 +18,7 @@ type Interface struct {
   ListenPort int
   PrivateKey string
   PostUp string
+  PostDown string
 }
 
 

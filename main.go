@@ -150,7 +150,8 @@ func initialize(ConsulClient *api.Client, physicalIpAddr string, privKey string,
       myWgConfigMap["port"] == strconv.Itoa(config.WGPort) &&
       myWgConfigMap["pubkey"] == pubKey &&
       myWgConfigMap["allowedips"] == myWgConfigMap["ip"] + "/32" + config.WGAllowedIPs &&
-      myWgConfigMap["postup"] == config.WGPostUp) {
+      myWgConfigMap["postup"] == config.WGPostUp) &&
+      myWgConfigMap["postdown"] == config.WGPostDown) {
 
       fmt.Println("My registred configurations are consistent")
 
@@ -165,6 +166,7 @@ func initialize(ConsulClient *api.Client, physicalIpAddr string, privKey string,
         ListenPort: config.WGPort, 
         PrivateKey: privKey,
         PostUp: config.WGPostUp,
+        PostDown: config.WGPostDown
       }
       if(started){
         fmt.Println("I already started my wg interface")
@@ -201,6 +203,20 @@ func initialize(ConsulClient *api.Client, physicalIpAddr string, privKey string,
         output, err := cmd.Output()
         if(err != nil){
           return fmt.Errorf("error running postUp commands: %s", err.Error(), buf.String())
+        }
+        fmt.Println(string(output[:]))
+      }
+      return nil
+
+      // Whether the interface was stopped or has just restarted, run PostDown, it should be idempotent
+      fmt.Println("Running PostDown")
+      if(newWgInterface.PostDown != ""){
+        cmd := exec.Command("sh", "-c", newWgInterface.PostDown)
+        var buf bytes.Buffer
+        cmd.Stderr = &buf
+        output, err := cmd.Output()
+        if(err != nil){
+          return fmt.Errorf("error running postDown commands: %s", err.Error(), buf.String())
         }
         fmt.Println(string(output[:]))
       }
@@ -288,6 +304,11 @@ func initialize(ConsulClient *api.Client, physicalIpAddr string, privKey string,
             Verb:    api.KVSet,
             Key:     config.LongKVPrefix + "nodes/" + physicalIpAddr + "/postup",
             Value:   []byte(config.WGPostUp),
+          },
+          &api.KVTxnOp{
+            Verb:    api.KVSet,
+            Key:     config.LongKVPrefix + "nodes/" + physicalIpAddr + "/postdown",
+            Value:   []byte(config.WGPostDown),
           },
         }
         ok, _, _, err := ConsulKV.Txn(nodeKVTxnOps, nil)
